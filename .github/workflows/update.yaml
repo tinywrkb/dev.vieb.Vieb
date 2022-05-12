@@ -1,0 +1,113 @@
+name: Check for updates
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+jobs:
+  updates-check:
+    name: Updates check job for ${{ matrix.branch }}
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-21.08
+      options: --privileged
+    env:
+      GIT_AUTHOR_NAME: github-actions[bot]
+      GIT_COMMITTER_NAME: github-actions[bot]
+      GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+      GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+      EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GIT_BASE_BRANCH: ${{ matrix.branch }}
+    if: github.repository_owner == 'flathub'
+    strategy:
+      matrix:
+        branch: [ master ]
+
+    steps:
+      - name: Git checkout ${{ github.repository }}.git/${{ matrix.branch }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Process Flatpak manifest
+        run: |
+              APP_ID=${GITHUB_REPOSITORY#${GITHUB_REPOSITORY_OWNER}/}
+
+              # set flatpak manifest filename and type
+              for suffix in json yaml yml; do
+                APP_MANIFEST="${APP_ID}.${suffix}"
+                if [ -e "$APP_MANIFEST" ]; then
+                  echo "Found Flatpak manifest $APP_MANIFEST"
+                  case $suffix in
+                    json)
+                      APP_MANIFEST_TYPE=json
+                      APP_MANIFEST_IND=4
+                      ;;
+                    yaml|yml)
+                      APP_MANIFEST_TYPE=yaml
+                      APP_MANIFEST_IND=2
+                      ;;
+                  esac
+                  break
+                fi
+              done
+              if [ ! -e "$APP_MANIFEST" ]; then
+                >&2 echo "Cannot find Flatpak application manifest!"
+                exit 1
+              fi
+
+              # export environment variables
+              env_vars=(
+                APP_{ID,MANIFEST{,_IND,_TYPE}}
+              )
+
+              for var in ${env_vars[@]}; do
+                echo "Exporting environment variable: $var=${!var}"
+                echo "$var=${!var}" >> $GITHUB_ENV
+              done
+
+      - name: Run Flatpak External Data Checker (edit only)
+        uses: docker://ghcr.io/flathub/flatpak-external-data-checker:latest
+        with:
+          args: --edit-only ${{ env.APP_MANIFEST }}
+
+      # TODO: change this, we only care about main manifest and metainfo, git status might not be the best test
+      - name: Detect Flatapk External Data Checker changes
+        id: is-updated 
+        run: |
+          git status -s -uno
+          [ -z "$(git status -s -uno)" ] || echo "::set-output name=updated::true"
+
+      - uses: actions/setup-python@v3
+        if: steps.is-updated.outputs.updated
+        with:
+          python-version: 3.9
+
+      # TODO: split module from main manifest
+      #       check if fedc changed main manifest
+      #       check if fedc update metainfo
+      #       if both true, read version, update generated sources, commit with new version
+      # TODO: split module from main manifest
+      #       check if fedc changed main manifest
+      #       check if fedc update metainfo
+      #       if both true, read version, save version, reset all but generated sources
+      #       if only one changed, then exit with an error, it shouldn't happen
+      - name: Update generated-sources.json
+        if: steps.is-updated.outputs.updated
+        run: |
+              python3 -m pip install aiohttp
+              git submodule update --init
+              # TODO: version should be set by the detect step
+              ver=$(grep release ${{ env.APP_ID }}.metainfo.xml | grep -m1 -oP '(?<=version=.)[^"]+')
+              curl -L https://raw.githubusercontent.com/Jelmerro/Vieb/v${ver}/package-lock.json > package-lock.json
+              ./flatpak-builder-tools/node/flatpak-node-generator.py npm --xdg-layout package-lock.json
+          
+      # TODO: this should actually reset all the manifests, not only the main one, maybe */*.json
+      - name: Reset all but generated-sources.json
+        run: |
+              git checkout -- ${{ env.APP_MANIFEST }} ${{ env.APP_ID }}.metainfo.xml
+
+      - name: Run Flatpak External Data Checker (open pull request)
+        uses: docker://ghcr.io/flathub/flatpak-external-data-checker:latest
+        with:
+          args: --update --never-fork ${{ env.APP_MANIFEST }}
