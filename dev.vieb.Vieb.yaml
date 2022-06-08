@@ -79,14 +79,15 @@ modules:
     sources:
       # build from source
       - type: archive
-        url: https://github.com/Jelmerro/Vieb/archive/7.2.0/Vieb-7.2.0.tar.gz
-        sha256: bdce57d57f5770b265bae397e99991939e06b1b73f616fe02be27bf3e8ada309
+        url: https://github.com/Jelmerro/Vieb/archive/8.0.0/Vieb-8.0.0.tar.gz
+        sha256: 7a5a01d4a149e55fc1ddffb7ea961abb8835b77bac944aab73ebc4209d9b2aab
         x-checker-data:
           is-main-source: true
           type: json
           url: https://api.github.com/repos/Jelmerro/Vieb/releases/latest
           version-query: .tag_name
-          url-query: '"https://github.com/Jelmerro/Vieb/archive/" + $version + "/Vieb-" + $version + ".tar.gz"'
+          url-query: '"https://github.com/Jelmerro/Vieb/archive/" + $version + "/Vieb-"
+            + $version + ".tar.gz"'
       - generated-sources.json # $ flatpak-node-generator.py npm --xdg-layout package-lock.json
 
       # use binary release
