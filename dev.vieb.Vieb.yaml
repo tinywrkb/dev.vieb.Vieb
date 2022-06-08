@@ -79,14 +79,15 @@ modules:
     sources:
       # build from source
       - type: archive
-        url: https://github.com/Jelmerro/Vieb/archive/7.2.0/Vieb-7.2.0.tar.gz
-        sha256: bdce57d57f5770b265bae397e99991939e06b1b73f616fe02be27bf3e8ada309
+        url: https://github.com/Jelmerro/Vieb/archive/8.0.0/Vieb-8.0.0.tar.gz
+        sha256: 7a5a01d4a149e55fc1ddffb7ea961abb8835b77bac944aab73ebc4209d9b2aab
         x-checker-data:
           is-main-source: true
           type: json
           url: https://api.github.com/repos/Jelmerro/Vieb/releases/latest
           version-query: .tag_name
-          url-query: '"https://github.com/Jelmerro/Vieb/archive/" + $version + "/Vieb-" + $version + ".tar.gz"'
+          url-query: '"https://github.com/Jelmerro/Vieb/archive/" + $version + "/Vieb-"
+            + $version + ".tar.gz"'
       - generated-sources.json # $ flatpak-node-generator.py npm --xdg-layout package-lock.json
 
       # use binary release
@@ -140,8 +141,8 @@ modules:
           - install -Dm755 modules/printbackends/libprintbackend-cups.so -t ${FLATPAK_DEST}/lib/gtkmodules/3.0.0/printbackends/
         sources:
           - type: archive
-            url: https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.33.tar.xz
-            sha256: 588b06522e25d1579e989b6f9d8a1bdbf2fe13cde01a04e904ff346a225e7801
+            url: https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.34.tar.xz
+            sha256: dbc69f90ddc821b8d1441f00374dc1da4323a2eafa9078e61edbe5eeefa852ec
             x-checker-data:
               type: gnome
               name: gtk+
@@ -167,8 +168,8 @@ modules:
           - --disable-rpath
         sources:
           - type: archive
-            url: https://github.com/krb5/krb5/archive/refs/tags/krb5-1.19.3-final.tar.gz
-            sha256: 131890da54fff2ac339e93facf9d8067f7db53b15181f38104c0b56a6f2acdee
+            url: https://github.com/krb5/krb5/archive/refs/tags/krb5-1.20-final.tar.gz
+            sha256: cbbf7ff2fb25d44cf3ed6fee120c073cd291af2bdcc3f466433f0482e238fb59
             x-checker-data:
               type: anitya
               project-id: 13287
