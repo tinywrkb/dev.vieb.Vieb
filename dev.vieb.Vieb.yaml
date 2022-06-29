@@ -79,8 +79,8 @@ modules:
     sources:
       # build from source
       - type: archive
-        url: https://github.com/Jelmerro/Vieb/archive/8.0.0/Vieb-8.0.0.tar.gz
-        sha256: 7a5a01d4a149e55fc1ddffb7ea961abb8835b77bac944aab73ebc4209d9b2aab
+        url: https://github.com/Jelmerro/Vieb/archive/8.1.0/Vieb-8.1.0.tar.gz
+        sha256: 40fcebd92b8c9550cd0a3462d2a6dab00269158ceac86711bcd8b86cde051167
         x-checker-data:
           is-main-source: true
           type: json
