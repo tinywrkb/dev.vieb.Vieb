@@ -84,6 +84,11 @@ modules:
       - install -Dm755 stub_sandbox ${FLATPAK_DEST}/vieb/chrome-sandbox
       - install -Dm644 ${FLATPAK_ID}.desktop -t ${FLATPAK_DEST}/share/applications/
       - install -Dm644 ${FLATPAK_ID}.metainfo.xml -t ${FLATPAK_DEST}/share/metainfo/
+      - |
+        install -Dm644 /dev/stdin /app/etc/cobalt.ini <<EOF
+        [Application]
+        EntryPoint=/app/vieb/vieb
+        EOF
     sources:
       # build from source
       - type: archive
@@ -129,8 +134,7 @@ modules:
       - type: script
         dest-filename: vieb
         commands:
-          - export TMPDIR=$XDG_RUNTIME_DIR/app/$FLATPAK_ID
-          - exec zypak-wrapper /app/vieb/vieb "$@"
+          - exec cobalt "$@"
       - type: script
         dest-filename: stub_sandbox
         commands:
@@ -142,6 +146,17 @@ modules:
       - type: file
         path: dev.vieb.Vieb.metainfo.xml
     modules:
+      - name: cobalt
+        buildsystem: meson
+        sources:
+          - type: archive
+            url: https://github.com/refi64/cobalt/archive/v2022.03/cobalt-2022.03.tar.gz
+            sha256: b8c2f9df219482865a8b1c575e47e1078df44301a5d674a75318e9ff7699153d
+            x-checker-data:
+              type: anitya
+              project-id: 233431
+              stable-only: true
+              url-template: https://github.com/refi64/cobalt/archive/v$version/cobalt-$version.tar.gz
       - name: gtk-cups-backend
         buildsystem: meson
         make-args:
