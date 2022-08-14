@@ -44,11 +44,19 @@ modules:
       - install -dm755 ${FLATPAK_DEST}/vieb
 
       # build from source
-      - source flatpak-node/electron-builder-arch-args.sh
+     #- source flatpak-node/electron-builder-arch-args.sh
       - npm install --offline --cache=$FLATPAK_BUILDER_BUILDDIR/flatpak-node/npm-cache
      #- npm run buildlinux $ELECTRON_BUILDER_ARCH_ARGS
      #- node build.js --linux dir
-      - electron-builder $ELECTRON_BUILDER_ARCH_ARGS --config.asar=false --linux dir
+     #- electron-builder $ELECTRON_BUILDER_ARCH_ARGS --config.asar=false --linux dir
+      - |
+        if [ "$FLATPAK_ARCH" = x86_64 ]; then
+          ELECTRON_ARCH=x64
+        else
+          ELECTRON_ARCH=arm64
+        fi
+        sed -i 's/@@ARCH@@/'$ELECTRON_ARCH'/' electron-builder.yml
+      - node build.js --regular --linux
       - |
         if [ ${FLATPAK_ARCH} == 'x86_64' ]; then
           cp -r dist/linux-unpacked/* ${FLATPAK_DEST}/vieb/
@@ -79,8 +87,8 @@ modules:
     sources:
       # build from source
       - type: archive
-        url: https://github.com/Jelmerro/Vieb/archive/8.1.0/Vieb-8.1.0.tar.gz
-        sha256: 40fcebd92b8c9550cd0a3462d2a6dab00269158ceac86711bcd8b86cde051167
+        url: https://github.com/Jelmerro/Vieb/archive/9.0.0/Vieb-9.0.0.tar.gz
+        sha256: 35499fdaa84ad0f30cd1e2acecf5703b079f6435ce97b3aec5dba3cd3c84d632
         x-checker-data:
           is-main-source: true
           type: json
@@ -88,6 +96,8 @@ modules:
           version-query: .tag_name
           url-query: '"https://github.com/Jelmerro/Vieb/archive/" + $version + "/Vieb-"
             + $version + ".tar.gz"'
+      - type: patch
+        path: vieb-electron-builder-targets.patch
       - generated-sources.json # $ flatpak-node-generator.py npm --xdg-layout package-lock.json
 
       # use binary release
