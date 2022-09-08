@@ -1,9 +1,9 @@
 app-id: dev.vieb.Vieb
 runtime: org.freedesktop.Platform
-runtime-version: '21.08'
+runtime-version: '22.08'
 sdk: org.freedesktop.Sdk
 base: org.electronjs.Electron2.BaseApp
-base-version: '21.08'
+base-version: '22.08'
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.node18
 command: vieb
@@ -87,8 +87,8 @@ modules:
     sources:
       # build from source
       - type: archive
-        url: https://github.com/Jelmerro/Vieb/archive/9.0.0/Vieb-9.0.0.tar.gz
-        sha256: 35499fdaa84ad0f30cd1e2acecf5703b079f6435ce97b3aec5dba3cd3c84d632
+        url: https://github.com/Jelmerro/Vieb/archive/9.1.0/Vieb-9.1.0.tar.gz
+        sha256: d7c639a3914e578303d9b19a84b668bf904d1950f02d508b161f14f4cd8a7735
         x-checker-data:
           is-main-source: true
           type: json
